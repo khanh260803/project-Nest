@@ -1,0 +1,44 @@
+1. định metaData cho role
+tạo 1 decorator để đính kèm role vào handler :
+
+import { SetMetadata } from '@nestjs/common';
+
+export const ROLES_KEY = 'roles';
+export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles); 
+
+//nếu bạn có nhiều role tạo 1 enum chứa tất cả role sau đó thay thế phần useRole[] của string[]
+
+2.Tạo Guard để kiểm tra Role
+
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { ROLES_KEY } from './roles.decorator';
+import { UserRole } from './user-role.enum'; // Import enum
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    // Lấy các roles yêu cầu từ metadata
+    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // Nếu không yêu cầu roles nào, cho phép truy cập
+    if (!requiredRoles) {
+      return true;
+    }
+
+    // Lấy thông tin user từ request
+    const { user } = context.switchToHttp().getRequest();
+
+    // Kiểm tra user có ít nhất 1 role phù hợp
+    return requiredRoles.some((role) => user?.roles?.includes(role));
+  }
+}
+
+3. dùng trong các router 
+ @Roles(UserRole.Admin) 
+

@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  username     String
+  email        String         @unique
+  password     String
+  avatarUrl    String?
+  role         UserRole
+  dob          DateTime
+  status       Status?
+  companyId    Int?
+  company      Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  topics       Topic[]
+  posts        Post[]
+  comments     Comment[]
+  likes        Like[]
+  RefreshToken RefreshToken[]
+  deletedAt    DateTime?
+  isDeleted    Boolean        @default(false)
+}
+
+model Company {
+  id        Int       @id @default(autoincrement())
+  name      String
+  address   String
+  maxUsers  Int
+  status    Status
+  expiredAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  isDeleted Boolean   @default(false)
+  users     User[]
+}
+
+model Topic {
+  id        Int       @id @default(autoincrement())
+  title     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy Int
+  creator   User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  deletedAt DateTime?
+  isDeleted Boolean   @default(false)
+  posts     Post[]
+}
+
+model Tag {
+  id    Int       @id @default(autoincrement())
+  name  String    @unique
+  posts PostTag[]
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String?
+  topicId   Int?
+  createdBy Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pinned    Boolean   @default(false)
+  topic     Topic?    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  tags      PostTag[]
+  comments  Comment[]
+}
+
+model PostTag {
+  postId Int
+  tagId  Int
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId]) // Composite key
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  postId    Int
+  content   String
+  createdBy Int
+  createdAt DateTime  @default(now())
+  resolved  Boolean   @default(false)
+  deletedAt DateTime?
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  likes     Like[]
+}
+
+model Like {
+  commentId Int
+  userId    Int
+  createdAt DateTime @default(now())
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, userId]) // Composite key
+}
+
+enum UserRole {
+  Admin
+  CompanyUser
+  Member
+}
+
+enum Status {
+  inActive
+  Active
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.VarChar(512)
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id]) // Relationship with User
+}

@@ -1,0 +1,38 @@
+//khởi tạo 1 dự án
+nest new project-name
+
+
+//cài đặt prisma
+npm install prisma --save
+npm install @prisma/client --save
+
+//khởi tạo prisma
+npx prisma init
+
+
+3. cập nhật cơ sở dữ liệu
+npx prisma migrate dev --name init
+
+4.tạo prisma migration 
+npx prisma migrate dev --name migration_name
+
+5.tao folder trong src 
+nest generate resource project-name
+
+6.thêm byscipt 
+npm install bcrypt
+npm install @types/bcrypt --save-dev
+
+7.cài jwt
+npm i --save @nestjs/jwt
+
+8.cai redis
+npm install nestjs-redis ioredis
+
+
+
+9.khởi tao mailhog
+
+docker pull mailhog/mailhog
+docker run -d -p 1025:1025 -p 8025:8025 mailhog/mailhog
+http://localhost:8025
