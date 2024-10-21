@@ -9,7 +9,6 @@ import {
 import { UserManagementService } from './user-management.service';
 import { CreateUserManagementDto } from './dto/create-user-management.dto';
 import { UpdateUserManagementDto } from './dto/update-user-management.dto';
-import { ResetPassDto } from './dto/reset-password.dto';
 
 @Controller('user-management')
 export class UserManagementController {
