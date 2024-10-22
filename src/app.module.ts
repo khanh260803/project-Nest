@@ -22,6 +22,12 @@ import { AuthController } from './authentication/auth.controller';
 import { CompanyManagementController } from './admin/company-management/company-management.controller';
 import { CompanyManagementService } from './admin/company-management/company-management.service';
 import { RedisModule } from './redis/redis.module';
+import { TagManagementModule } from './admin/tag-management/tag-management.module';
+import { TagManagementController } from './admin/tag-management/tag-management.controller';
+import { PostManagementModule } from './admin/post-management/post-management.module';
+import { PostManagementController } from './admin/post-management/post-management.controller';
+import { UserCompanyManagementModule } from './company_user/user-company-management/user-company-management.module';
+import { UserCompanyManagementController } from './company_user/user-company-management/user-company-management.controller';
 @Module({
   imports: [
     PrismaModule,
@@ -45,6 +51,14 @@ import { RedisModule } from './redis/redis.module';
     UploadModule,
 
     RedisModule,
+
+    TagManagementModule,
+
+    PostManagementModule,
+
+    UserCompanyManagementModule,
+
+
   ],
   controllers: [AppController, TopicManagementController],
   providers: [
@@ -67,6 +81,9 @@ export class AppModule {
         { path: 'user/userSetting', method: RequestMethod.POST },
         TopicManagementController,
         CompanyManagementController,
+        TagManagementController,
+        PostManagementController,
+        UserCompanyManagementController,
       );
   }
 }

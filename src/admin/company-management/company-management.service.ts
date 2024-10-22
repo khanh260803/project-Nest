@@ -8,19 +8,18 @@ export class CompanyManagementService {
   constructor(private readonly prismaService: PrismaService) {}
   // add new company
   async createNewUser(addCompany: createNewCompany, @Req() req: CustomRequest) {
-    const { name, address, maxUsers, expiredAt, status } = addCompany;
     await this.prismaService.company.create({
       data: {
         ...addCompany,
       },
     });
 
-    return { message: 'Add company succesfull' };
+    return { message: 'Add company successful' };
   }
+
   //edit company
   async updateCompany(id: number, @Body() updateCompanyDto: updateCompany) {
     console.log(updateCompanyDto);
-    const { name, address, maxUsers, expiredAt, status } = updateCompanyDto;
     const company = await this.prismaService.company.findUnique({
       where: { id },
     });
@@ -31,7 +30,7 @@ export class CompanyManagementService {
         id,
       },
     });
-    return { message: 'Update company succesfull', result };
+    return { message: 'Update company successful', result };
   }
 
   //soft delete company
@@ -43,16 +42,17 @@ export class CompanyManagementService {
       },
       where: { id },
     });
-    return { message: 'soft delete succesfull' };
+    return { message: 'soft delete successful' };
   }
 
   //get all company
   async getAllCompany() {
-    const user = await this.prismaService.company.findMany({
+    const company = await this.prismaService.company.findMany({
       where: { isDeleted: false },
     });
-    return { message: 'fetch all user', user };
+    return { message: 'fetch all user', company };
   }
+
   async restoreCompany(id: number) {
     await this.prismaService.company.update({
       data: {

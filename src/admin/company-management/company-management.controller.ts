@@ -26,9 +26,11 @@ export class CompanyManagementController {
   ) {}
 
   @Get('get-user')
+  @Roles(UserRole.Admin)
   async getAllCompany() {
     return this.companyManagementService.getAllCompany();
   }
+
   @Post('create-company')
   @Roles(UserRole.Admin)
   async createNewUser(
@@ -37,18 +39,24 @@ export class CompanyManagementController {
   ) {
     return this.companyManagementService.createNewUser(createNewCompany, req);
   }
+
   @Put(':id/update')
+  @Roles(UserRole.Admin)
   updateCompany(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCompanyDto: updateCompany,
   ) {
     return this.companyManagementService.updateCompany(id, updateCompanyDto);
   }
+
   @Put(':id/soft-delete')
+  @Roles(UserRole.Admin)
   softDelete(@Param('id', ParseIntPipe) id: number) {
     return this.companyManagementService.softDelete(id);
   }
+
   @Put(':id/restore-company')
+  @Roles(UserRole.Admin)
   restoreCompany(@Param('id', ParseIntPipe) id: number) {
     return this.companyManagementService.restoreCompany(id);
   }

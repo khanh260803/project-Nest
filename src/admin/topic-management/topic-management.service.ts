@@ -1,4 +1,11 @@
-import { Injectable, Body, Req, Param } from '@nestjs/common';
+import {
+  Injectable,
+  Body,
+  Req,
+  Param,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { TopicDto } from './dto/create-topic-management.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CustomRequest } from 'src/custom-request';
@@ -45,6 +52,9 @@ export class TopicManagementService {
     const topic = await this.prismaService.topic.findMany({
       where: { isDeleted: false },
     });
+    if (topic.length === 0) {
+      throw new HttpException({ message: 'No topic' }, HttpStatus.BAD_REQUEST);
+    }
     return { message: 'fetch data topic ', topic };
   }
   //restore topic
