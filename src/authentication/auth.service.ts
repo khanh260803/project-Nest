@@ -108,7 +108,7 @@ export class AuthService {
       const payload = { id: user.id, email: user.email, role: user.role };
       const accessToken = this.jwt.sign(payload, {
         secret: process.env.SECRET_TOKEN,
-        expiresIn: '1h',
+        expiresIn: '7h',
       });
       const refreshToken = this.jwt.sign(payload, {
         secret: process.env.REFRESH_SECRET_TOKEN,
@@ -124,7 +124,7 @@ export class AuthService {
       });
 
       await this.cacheManager.set(`token_${accessToken}`, true, 1000000);
-      res.cookie('refreshToken', refreshToken, {
+      res.cookie('accessToken', accessToken, {
         httpOnly: true,
         secure: true,
         sameSite: 'strict',
@@ -640,26 +640,18 @@ export class AuthService {
       expiresIn: '7h',
     });
 
-    await this.prisma.refreshToken.create({
-      data: {
-        token: refreshToken,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    });
-
     const token = await this.redis.set('token', accessToken, 'EX', 100000);
     console.log(token);
     console.log(await this.redis.get('token'));
     //lưu vào cookies
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      maxAge: 60 * 60 * 1000, // 7 ngày
     });
 
-    return { message: 'Login successful version 2', accessToken, refreshToken };
+    return { message: 'Login successful version 2', accessToken };
   }
   async logout(res: Response) {
     res.clearCookie('refreshToken');

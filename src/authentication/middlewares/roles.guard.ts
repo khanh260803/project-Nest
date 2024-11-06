@@ -6,9 +6,8 @@ import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}  //reflector là 1 service lấy thông tin từ metadata 
+  constructor(private reflector: Reflector) {} //reflector là 1 service lấy thông tin từ metadata
   canActivate(context: ExecutionContext): boolean {
-    //lấy các role tử metadata
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
       ROLE_KEYS,
       [context.getHandler(), context.getClass()],

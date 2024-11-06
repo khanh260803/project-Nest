@@ -64,10 +64,6 @@ export class AuthController {
     return this.authService.resetPass(resetDto);
   }
 
-  @Post('refresh')
-  async refreshToken(@Req() req: Request, @Res() res: Response) {
-    return this.authService.refreshToken(req, res);
-  }
   @Post('logout')
   async logout(@Res() res: Response) {
     // Xoá token từ trình duyệt
