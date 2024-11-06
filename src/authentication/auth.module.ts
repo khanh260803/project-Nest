@@ -8,6 +8,7 @@ import { JwtMiddleware } from './middlewares/verify.middleware';
 import { TopicManagementController } from 'src/admin/topic-management/topic-management.controller';
 import { TopicManagementService } from 'src/admin/topic-management/topic-management.service';
 import { RedisModule } from 'src/redis/redis.module';
+import { EmailService } from 'src/email/email.service';
 
 @Module({
   imports: [
@@ -23,6 +24,12 @@ import { RedisModule } from 'src/redis/redis.module';
     RedisModule,
   ],
   controllers: [AuthController, TopicManagementController],
-  providers: [AuthService, PrismaService, JwtService, TopicManagementService],
+  providers: [
+    AuthService,
+    PrismaService,
+    JwtService,
+    TopicManagementService,
+    EmailService,
+  ],
 })
 export class AuthModule {}

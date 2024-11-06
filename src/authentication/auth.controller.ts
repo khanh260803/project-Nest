@@ -9,6 +9,7 @@ import {
   Req,
   Res,
   Version,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
@@ -66,5 +67,10 @@ export class AuthController {
   @Post('refresh')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     return this.authService.refreshToken(req, res);
+  }
+  @Post('logout')
+  async logout(@Res() res: Response) {
+    // Xoá token từ trình duyệt
+    return this.authService.logout(res);
   }
 }

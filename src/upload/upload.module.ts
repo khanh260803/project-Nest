@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { BadRequestException, Module } from '@nestjs/common';
 import { UploadService } from './upload.service';
 import { UploadController } from './upload.controller';
 import { MinioService } from 'src/minio/minio.service';
@@ -9,16 +9,17 @@ import { extname } from 'path';
   imports: [
     MulterModule.register({
       storage: diskStorage({
-        destination: './uploads', // Thư mục lưu file tạm thời
-        filename: (req, file, callback) => {
+        destination: './uploads', // Temporary local storage
+        filename: (req, file, cb) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(null, uniqueSuffix + extname(file.originalname)); // Đặt tên file duy nhất
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
     }),
   ],
   controllers: [UploadController],
   providers: [UploadService, MinioService],
+  exports: [UploadService],
 })
 export class UploadModule {}

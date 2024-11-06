@@ -20,8 +20,9 @@ export class JwtMiddleware implements NestMiddleware {
         .find((c) => c.startsWith('refreshToken='))
         ?.split('=')[1];
 
+      // Kiểm tra nếu không có refreshToken, chuyển hướng đến trang login
       if (!refreshToken) {
-        throw new HttpException('Token not found', HttpStatus.UNAUTHORIZED);
+        return res.redirect('http://localhost:3000/pages/auth/login');
       }
 
       // Xác minh token
@@ -35,10 +36,8 @@ export class JwtMiddleware implements NestMiddleware {
       next(); // Chuyển tiếp nếu thành công
     } catch (error) {
       console.error('JWT Verification Error:', error);
-      throw new HttpException(
-        'Invalid or expired token',
-        HttpStatus.UNAUTHORIZED,
-      );
+      // Khi token không hợp lệ hoặc hết hạn, chuyển hướng đến trang login
+      return res.redirect('http://localhost:3000/pages/auth/login');
     }
   }
 }

@@ -33,6 +33,7 @@ model User {
   RefreshToken RefreshToken[]
   deletedAt    DateTime?
   isDeleted    Boolean        @default(false)
+  Tag          Tag[]
 }
 
 model Company {
@@ -62,9 +63,15 @@ model Topic {
 }
 
 model Tag {
-  id    Int       @id @default(autoincrement())
-  name  String    @unique
-  posts PostTag[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  posts     PostTag[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy Int
+  creator   User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  deletedAt DateTime?
+  isDeleted Boolean   @default(false)
 }
 
 model Post {
@@ -72,6 +79,7 @@ model Post {
   title     String
   content   String?
   topicId   Int?
+  tagId     Int?
   createdBy Int
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -80,6 +88,8 @@ model Post {
   creator   User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   tags      PostTag[]
   comments  Comment[]
+  deletedAt DateTime?
+  isDeleted Boolean   @default(false)
 }
 
 model PostTag {
@@ -94,14 +104,21 @@ model PostTag {
 model Comment {
   id        Int       @id @default(autoincrement())
   postId    Int
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   content   String
   createdBy Int
   createdAt DateTime  @default(now())
   resolved  Boolean   @default(false)
   deletedAt DateTime?
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  creator   User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  likes     Like[]
+  isDeleted Boolean   @default(false)
+
+  // Self-referential relation for nested comments
+  parentId Int? // Thêm trường parentId để liên kết đến comment cha
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReplies")
+
+  creator User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  likes   Like[]
 }
 
 model Like {
@@ -123,6 +140,11 @@ enum UserRole {
 enum Status {
   inActive
   Active
+}
+
+enum Pin {
+  Pin
+  UnPin
 }
 
 model RefreshToken {

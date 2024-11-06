@@ -45,9 +45,9 @@ export class OtpDto {
   @IsNumber()
   ramdomNum: number;
 
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  // @IsNotEmpty()
+  // @IsEmail()
+  // email: string;
 }
 export class ResetDto {
   @IsNotEmpty()
@@ -56,5 +56,5 @@ export class ResetDto {
 
   @IsNotEmpty()
   @MinLength(6, { message: 'Password must be 6 characters' })
-  comfirmPass: string;
+  confirmPass: string;
 }

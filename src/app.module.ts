@@ -16,35 +16,52 @@ import { MinioModule } from './minio/minio.module';
 import { UploadModule } from './upload/upload.module';
 import { TopicManagementController } from './admin/topic-management/topic-management.controller';
 import { TopicManagementService } from './admin/topic-management/topic-management.service';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './authentication/middlewares/roles.guard';
 import { AuthController } from './authentication/auth.controller';
 import { CompanyManagementController } from './admin/company-management/company-management.controller';
 import { CompanyManagementService } from './admin/company-management/company-management.service';
 import { RedisModule } from './redis/redis.module';
+import { TagManagementModule } from './admin/tag-management/tag-management.module';
+import { TagManagementController } from './admin/tag-management/tag-management.controller';
+import { PostManagementModule } from './admin/post-management/post-management.module';
+import { PostManagementController } from './admin/post-management/post-management.controller';
+import { UserCompanyManagementModule } from './company_user/user-company-management/user-company-management.module';
+import { UserCompanyManagementController } from './company_user/user-company-management/user-company-management.controller';
+import { UserManagementController } from './admin/user-management/user-management.controller';
+//
+import { LoggerModule } from './winston/logger.module';
+import { v4 as uuidv4 } from 'uuid';
+import { ResponseMiddleware } from './authentication/middlewares/api-response.middleware';
+import { HttpExceptionFilter } from './authentication/middlewares/http-exception.filter';
+import { CommentModule } from './comment/comment.module';
+import { CommentController } from './comment/comment.controller';
+import { LikeModule } from './like/like.module';
+import { LikeController } from './like/like.controller';
+import { UserController } from './user/user.controller';
+
 @Module({
   imports: [
+    CacheModule.register({
+      ttl: 100000,
+      max: 100,
+    }),
     PrismaModule,
     AuthModule,
-    CacheModule.register({
-      ttl: 100000, // thoi gian song la 5s
-      max: 100, //gioi han so luong cache
-    }),
     UserModule,
-
     CompanyManagementModule,
-
     UserManagementModule,
-
     EmailModule,
-
     TopicManagementModule,
-
     MinioModule,
-
     UploadModule,
-
     RedisModule,
+    TagManagementModule,
+    PostManagementModule,
+    UserCompanyManagementModule,
+    LoggerModule,
+    CommentModule,
+    LikeModule,
   ],
   controllers: [AppController, TopicManagementController],
   providers: [
@@ -57,6 +74,10 @@ import { RedisModule } from './redis/redis.module';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
   ],
 })
 export class AppModule {
@@ -65,8 +86,17 @@ export class AppModule {
       .apply(JwtMiddleware)
       .forRoutes(
         { path: 'user/userSetting', method: RequestMethod.POST },
+        UserManagementController,
         TopicManagementController,
         CompanyManagementController,
-      );
+        TagManagementController,
+        PostManagementController,
+        UserCompanyManagementController,
+        CommentController,
+        LikeController,
+        UserController,
+      )
+      .apply(ResponseMiddleware)
+      .forRoutes('*');
   }
 }
