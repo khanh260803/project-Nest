@@ -35,6 +35,7 @@ export class UserCompanyManagementController {
       req,
     );
   }
+
   @Post('reset-pass')
   async resetPass(@Body() password: ResetPassDto) {
     return this.userCompanyManagementService.resetPass(password);

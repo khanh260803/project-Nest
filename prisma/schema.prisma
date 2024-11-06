@@ -104,14 +104,21 @@ model PostTag {
 model Comment {
   id        Int       @id @default(autoincrement())
   postId    Int
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   content   String
   createdBy Int
   createdAt DateTime  @default(now())
   resolved  Boolean   @default(false)
   deletedAt DateTime?
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  creator   User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  likes     Like[]
+  isDeleted Boolean   @default(false)
+
+  // Self-referential relation for nested comments
+  parentId Int? // Thêm trường parentId để liên kết đến comment cha
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReplies")
+
+  creator User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  likes   Like[]
 }
 
 model Like {

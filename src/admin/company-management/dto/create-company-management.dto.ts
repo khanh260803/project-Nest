@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 import { Status } from '@prisma/client';
 export class createNewCompany {
   @IsString()
@@ -17,5 +23,8 @@ export class createNewCompany {
   expiredAt: Date;
 
   @IsNotEmpty()
+  @IsEnum(Status, {
+    message: 'Trạng thái phải là Active hoặc Inactive.',
+  })
   status: Status;
 }

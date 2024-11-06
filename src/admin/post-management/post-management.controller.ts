@@ -14,10 +14,13 @@ import { PostManagementService } from './post-management.service';
 import { CreatePostManagementDto } from './dto/create-post-management.dto';
 import { UpdatePostManagementDto } from './dto/update-post-management.dto';
 import { CustomRequest } from 'src/custom-request';
+import { Roles } from 'src/authentication/middlewares/role.decorator';
+import { UserRole } from '@prisma/client';
 
 @Controller('post-management')
 export class PostManagementController {
   constructor(private readonly postManagementService: PostManagementService) {}
+
   @Post('add-post')
   async createPost(
     @Body() postDto: CreatePostManagementDto,
@@ -39,13 +42,28 @@ export class PostManagementController {
   softDelete(@Param('id', ParseIntPipe) id: number) {
     return this.postManagementService.softDelete(id);
   }
+
   @Get('get-post')
+  @Roles(UserRole.Admin, UserRole.CompanyUser)
   async getAllCompany() {
     return this.postManagementService.getAllCompany();
   }
 
   @Put(':id/restore')
-  restoreCompany(@Param('id', ParseIntPipe) id: number) {
+  @Roles(UserRole.Admin)
+  async restoreCompany(@Param('id', ParseIntPipe) id: number) {
     return this.postManagementService.restorePost(id);
+  }
+  @Put(':id/pin')
+  @Roles(UserRole.Admin, UserRole.CompanyUser)
+  async pinPost(@Param('id', ParseIntPipe) id: number) {
+    return this.postManagementService.pinPost(id);
+  }
+
+  //api lay 5 bai post gan nhat
+  @Get('get-lastest-post')
+  @Roles(UserRole.Admin, UserRole.CompanyUser)
+  async getLastestPost() {
+    return this.postManagementService.getLastestPost();
   }
 }

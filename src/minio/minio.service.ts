@@ -1,6 +1,6 @@
 // src/minio-client/minio-client.service.ts
 import { Injectable } from '@nestjs/common';
-import { S3Client } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, S3Client } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class MinioService {
@@ -20,5 +20,17 @@ export class MinioService {
 
   get client() {
     return this.s3Client;
+  }
+
+  async createBucket(bucketName: string): Promise<void> {
+    try {
+      await this.client.send(new CreateBucketCommand({ Bucket: bucketName }));
+      console.log(`Bucket ${bucketName} created or already exists.`);
+    } catch (error) {
+      if (error.Code !== 'BucketAlreadyOwnedByYou') {
+        console.error(`Error creating bucket ${bucketName}:`, error);
+        throw error;
+      }
+    }
   }
 }

@@ -473,7 +473,7 @@ export class UserCompanyManagementService {
       },
       where: { id },
     });
-    return { message: 'soft delete succesfull' };
+    return { message: 'soft delete successful' };
   }
   //restore user
   async restoreUser(id: number) {

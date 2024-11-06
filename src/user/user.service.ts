@@ -8,63 +8,82 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserSettingDto } from './dto/user-dto';
 import { CustomRequest } from 'src/custom-request';
-import * as bycypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
+import { UploadService } from 'src/upload/upload.service';
+import { User } from '@prisma/client';
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly uploadService: UploadService,
+  ) {}
 
-  //update thong tin nguoi dung
-  async updateUser(userSettingDto: UserSettingDto, @Req() req: CustomRequest) {
-    console.log(userSettingDto);
-    console.log(req.user?.role);
-    const { email, password, newPass, comfirmPass } = userSettingDto;
-
-    const user = await this.prismaService.user.findUnique({
-      where: { email: req.user?.email },
-    });
-    console.log(user);
-    if (!user) {
-      throw new HttpException(
-        { message: 'user not exist' },
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    if (!bycypt.compare(password, user.password)) {
-      throw new HttpException(
-        {
-          message: 'Wrong password!Please enter again.',
+  async updateUser(
+    userSettingDto: UserSettingDto,
+    file: Express.Multer.File, // Handle the uploaded file
+    @Req() req: CustomRequest,
+  ): Promise<{ data: User; message: string }> {
+    try {
+      const { newPass, confirmPass, dob, password } = userSettingDto;
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          id: req.user?.id,
         },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (newPass !== comfirmPass) {
-      throw new HttpException(
-        {
-          message: 'New Password not match with Comfirm Password',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const hashPass = await bycypt.hash(newPass, 10);
+      });
 
-    await this.prismaService.user.update({
-      data: { email, password: hashPass },
-      where: { email: req.user?.email },
-    });
-    return { message: 'update profile successfull' };
+      if (password === null) {
+        await this.uploadService.uploadImage(file);
+        const updatedUser = await this.prismaService.user.update({
+          where: { id: req.user?.id },
+          data: {
+            avatarUrl: file.originalname,
+            dob,
+          },
+        });
+        return { data: updatedUser, message: 'update success' };
+      } else {
+        if (await bcrypt.compare(password, user.password)) {
+          if (newPass !== confirmPass) {
+            throw new HttpException(
+              {
+                message: 'password not match with old pas',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+          } else {
+            const hassPass = await bcrypt.hash(newPass, 10);
+            await this.uploadService.uploadImage(file);
+            const newUpdate = await this.prismaService.user.update({
+              data: { password: hassPass, dob, avatarUrl: file.originalname },
+              where: { id: req.user?.id },
+            });
+            return { data: newUpdate, message: 'update success' };
+          }
+        } else {
+          throw new HttpException(
+            {
+              message: 'password not match with old pas',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        { message: 'Error updating profile' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  //get all user
   async getAllUser(@Req() req: CustomRequest) {
     console.log(req.user?.email);
     const allUser = await this.prismaService.user.findMany();
 
-    return { message: 'fetch data succesfull', allUser };
+    return { message: 'fetch data successful', allUser };
   }
-
-  //logout
 
   async logout(@Req() req: CustomRequest, @Res() res: Response) {
     const user = await this.prismaService.user.findUnique({
