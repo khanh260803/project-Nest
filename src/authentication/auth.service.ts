@@ -640,23 +640,15 @@ export class AuthService {
       expiresIn: '7h',
     });
 
-    await this.prisma.refreshToken.create({
-      data: {
-        token: refreshToken,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    });
-
     const token = await this.redis.set('token', accessToken, 'EX', 100000);
     console.log(token);
     console.log(await this.redis.get('token'));
     //lưu vào cookies
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      maxAge: 60 * 60 * 1000, // 1 ngày
     });
 
     return { message: 'Login successful version 2', accessToken, refreshToken };

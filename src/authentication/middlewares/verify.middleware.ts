@@ -16,18 +16,18 @@ export class JwtMiddleware implements NestMiddleware {
     try {
       // Lấy token từ header cookie
       const cookies = req.headers.cookie?.split('; ') ?? [];
-      const refreshToken = cookies
-        .find((c) => c.startsWith('refreshToken='))
+      const accessToken = cookies
+        .find((c) => c.startsWith('accessToken='))
         ?.split('=')[1];
 
       // Kiểm tra nếu không có refreshToken, chuyển hướng đến trang login
-      if (!refreshToken) {
+      if (!accessToken) {
         return res.redirect('http://localhost:3000/pages/auth/login');
       }
 
       // Xác minh token
-      const decoded = this.jwtService.verify(refreshToken, {
-        secret: process.env.REFRESH_SECRET_TOKEN,
+      const decoded = this.jwtService.verify(accessToken, {
+        secret: process.env.SECRET_TOKEN,
       });
 
       // Gán thông tin user vào request
