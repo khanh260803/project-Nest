@@ -13,7 +13,7 @@ import {
 import { TopicManagementService } from './topic-management.service';
 import { TopicDto } from './dto/create-topic-management.dto';
 import { CustomRequest } from 'src/custom-request';
-import { Roles } from 'src/authentication/middlewares/role.decorator';
+import { Roles } from 'src/common/middlewares/role.decorator';
 import { UserRole } from '@prisma/client';
 
 @Controller('topic-management')
@@ -55,6 +55,4 @@ export class TopicManagementController {
   async restoreTopic(@Param('id', ParseIntPipe) id: number) {
     return this.topicManagementService.restoreTopic(id);
   }
-
-
 }

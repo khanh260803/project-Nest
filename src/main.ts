@@ -1,14 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { JwtMiddleware } from './authentication/middlewares/verify.middleware';
-import { HttpExceptionFilter } from './authentication/middlewares/http-exception.filter';
+import { JwtMiddleware } from './common/middlewares/verify.middleware';
+import { ResponseInterceptor } from './common/response.interceptor';
+import { InterceptorsFilter } from './common/exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {});
 
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3001',
     credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe());
@@ -16,10 +17,8 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: '1',
   });
-
-  const httpExceptionFilter = app.get(HttpExceptionFilter);
-  app.useGlobalFilters(httpExceptionFilter);
-
+  app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalFilters(new InterceptorsFilter());
   await app.listen(3001);
 }
 bootstrap();

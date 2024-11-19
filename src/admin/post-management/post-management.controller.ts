@@ -14,7 +14,7 @@ import { PostManagementService } from './post-management.service';
 import { CreatePostManagementDto } from './dto/create-post-management.dto';
 import { UpdatePostManagementDto } from './dto/update-post-management.dto';
 import { CustomRequest } from 'src/custom-request';
-import { Roles } from 'src/authentication/middlewares/role.decorator';
+import { Roles } from 'src/common/middlewares/role.decorator';
 import { UserRole } from '@prisma/client';
 
 @Controller('post-management')

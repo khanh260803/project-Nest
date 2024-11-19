@@ -4,11 +4,12 @@ import { AuthController } from './auth.controller';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { CacheModule } from '@nestjs/cache-manager';
-import { JwtMiddleware } from './middlewares/verify.middleware';
+import { JwtMiddleware } from '../common/middlewares/verify.middleware';
 import { TopicManagementController } from 'src/admin/topic-management/topic-management.controller';
 import { TopicManagementService } from 'src/admin/topic-management/topic-management.service';
 import { RedisModule } from 'src/redis/redis.module';
 import { EmailService } from 'src/email/email.service';
+import { LoggerService } from 'src/winston/logger.service';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EmailService } from 'src/email/email.service';
     JwtService,
     TopicManagementService,
     EmailService,
+    LoggerService,
   ],
 })
 export class AuthModule {}

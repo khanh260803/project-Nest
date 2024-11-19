@@ -22,6 +22,7 @@ import { access } from 'fs';
 import Redis from 'ioredis';
 import { User } from '@prisma/client';
 import { EmailService } from 'src/email/email.service';
+import { LoggerService } from 'src/winston/logger.service';
 @Injectable()
 export class AuthService {
   constructor(
@@ -30,6 +31,7 @@ export class AuthService {
     @Inject(Cache) private cacheManager: Cache,
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
     private emailService: EmailService,
+    private readonly loggerService: LoggerService,
   ) {}
 
   async register(
@@ -56,6 +58,7 @@ export class AuthService {
           role: 'Member',
         },
       });
+
       return {
         message: 'register successful',
         data: newUser,
@@ -601,6 +604,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
+    console.log(user);
     console.log(user.role);
     if (user.isDeleted === true) {
       throw new HttpException(
@@ -635,10 +639,6 @@ export class AuthService {
       secret: process.env.SECRET_TOKEN,
       expiresIn: '1h',
     });
-    const refreshToken = this.jwt.sign(payload, {
-      secret: process.env.REFRESH_SECRET_TOKEN,
-      expiresIn: '7h',
-    });
 
     const token = await this.redis.set('token', accessToken, 'EX', 100000);
     console.log(token);
@@ -648,9 +648,9 @@ export class AuthService {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      maxAge: 60 * 60 * 1000, // 7 ngày
+      maxAge: 60 * 60 * 1000,
     });
-
+    this.loggerService.log('Login successful version 2');
     return { message: 'Login successful version 2', accessToken };
   }
   async logout(res: Response) {

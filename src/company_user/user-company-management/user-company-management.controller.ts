@@ -15,7 +15,7 @@ import { CreateUserCompanyManagementDto } from './dto/create-user-company-manage
 import { UpdateUserCompanyManagementDto } from './dto/update-user-company-management.dto';
 import { ResetPassDto } from 'src/admin/user-management/dto/reset-password.dto';
 import { CustomRequest } from 'src/custom-request';
-import { Roles } from 'src/authentication/middlewares/role.decorator';
+import { Roles } from 'src/common/middlewares/role.decorator';
 import { UserRole } from '@prisma/client';
 
 @Controller('user-company-management')

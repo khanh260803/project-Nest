@@ -16,13 +16,11 @@ import { CompanyManagementService } from './company-management.service';
 import { createNewCompany } from './dto/create-company-management.dto';
 import { CustomRequest } from 'src/custom-request';
 import { updateCompany } from './dto/update-company.dto';
-import { RolesGuard } from 'src/authentication/middlewares/roles.guard';
-import { Roles } from 'src/authentication/middlewares/role.decorator';
-import { UserRole } from '@prisma/client';
-import { HttpExceptionFilter } from 'src/authentication/middlewares/http-exception.filter';
+import { RolesGuard } from 'src/common/middlewares/roles.guard';
+import { Roles } from 'src/common/middlewares/role.decorator';
+import { UserRole, Company, Status } from '../../types/prisma.types';
 
 @Controller({ path: 'company-management' })
-@UseFilters(HttpExceptionFilter)
 export class CompanyManagementController {
   constructor(
     private readonly companyManagementService: CompanyManagementService,

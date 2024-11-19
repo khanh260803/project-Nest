@@ -15,7 +15,7 @@ import { TagDto } from './dto/create-tag-management.dto';
 import { UpdateTagManagementDto } from './dto/update-tag-management.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CustomRequest } from 'src/custom-request';
-import { Roles } from 'src/authentication/middlewares/role.decorator';
+import { Roles } from 'src/common/middlewares/role.decorator';
 import { UserRole } from '@prisma/client';
 
 @Controller('tag-management')

@@ -11,7 +11,7 @@ import { UserManagementService } from './user-management.service';
 import { CreateUserManagementDto } from './dto/create-user-management.dto';
 import { UpdateUserManagementDto } from './dto/update-user-management.dto';
 import { ResetPassDto } from './dto/reset-password.dto';
-import { Roles } from 'src/authentication/middlewares/role.decorator';
+import { Roles } from 'src/common/middlewares/role.decorator';
 import { UserRole } from '@prisma/client';
 import { CustomRequest } from 'src/custom-request';
 
