@@ -21,6 +21,12 @@ export class JwtMiddleware implements NestMiddleware {
         ?.split('=')[1];
       console.log(accessToken);
 
+      // Kiểm tra nếu không có refreshToken, chuyển hướng đến trang login
+      if (!accessToken) {
+        return res.redirect('http://localhost:3000/pages/auth/login');
+      }
+
+      // Xác minh token
       const decoded = this.jwtService.verify(accessToken, {
         secret: process.env.SECRET_TOKEN,
       });
