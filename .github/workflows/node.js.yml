@@ -2,13 +2,12 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -16,34 +15,68 @@ jobs:
         node-version: [18.x, 20.x, 22.x]
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - uses: actions/checkout@v4
 
-    - run: npm ci
-    
-    - run: npm run build --if-present
-    
-    - run: |
-        echo "Setting up Docker containers"
-        docker network create app-network || true
-        docker run -d --name mysql --network app-network -e MYSQL_ROOT_PASSWORD=26082003 -e MYSQL_DATABASE=khanh -p 3306:3306 mysql:8
-        docker run -d --name redis --network app-network -p 6379:6379 redis:7
-        docker run -d --name minio --network app-network -e MINIO_ROOT_USER=admin -e MINIO_ROOT_PASSWORD=password123 -p 9000:9000 -p 9001:9001 quay.io/minio/minio server /data --console-address ":9001"
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - run: |
-        echo "Starting the application"
-        DATABASE_URL="mysql://root:26082003@mysql:3306/khanh" \
-        REDIS_URL="redis://redis:6379" \
-        MINIO_ENDPOINT="minio:9000" \
-        MINIO_ACCESS_KEY="admin" \
-        MINIO_SECRET_KEY="password123" \
-        SECRET_TOKEN="hello my friend" \
-        REFRESH_SECRET_TOKEN="FSLJFLSJLFJL" \
-        NODE_ENV=production \
-        LOG_LEVEL=debug \
-        npm run start:prod
+      - run: npm ci
+
+      - run: npm run build --if-present
+
+      - run: |
+          echo "Setting up Docker containers"
+          docker network create app-network || true
+
+          echo "Starting MySQL container"
+          docker run -d --name mysql \
+            --network app-network \
+            -e MYSQL_ROOT_PASSWORD=26082003 \
+            -e MYSQL_DATABASE=khanh \
+            -p 3306:3306 \
+            mysql:8
+
+          echo "Starting Redis container"
+          docker run -d --name redis \
+            --network app-network \
+            -p 6379:6379 \
+            redis:7
+
+          echo "Starting MinIO container"
+          docker volume create minio-data
+          docker run -d --name minio \
+            --network app-network \
+            -e MINIO_ROOT_USER=admin \
+            -e MINIO_ROOT_PASSWORD=password123 \
+            -p 9000:9000 \
+            -p 9001:9001 \
+            -v minio-data:/data \
+            quay.io/minio/minio server /data --console-address ":9001"
+
+      - run: |
+          echo "Validating Docker container statuses"
+          docker ps -a
+
+      - run: |
+          echo "Starting the application"
+          DATABASE_URL="mysql://root:26082003@mysql:3306/khanh" \
+          REDIS_URL="redis://redis:6379" \
+          MINIO_ENDPOINT="minio:9000" \
+          MINIO_ACCESS_KEY="admin" \
+          MINIO_SECRET_KEY="password123" \
+          SECRET_TOKEN="hello my friend" \
+          REFRESH_SECRET_TOKEN="FSLJFLSJLFJL" \
+          NODE_ENV=production \
+          LOG_LEVEL=debug \
+          npm run start:prod
+
+      - name: Inspect Logs for Debugging
+        if: failure()
+        run: |
+          echo "Fetching logs for troubleshooting"
+          docker logs mysql
+          docker logs redis
+          docker logs minio
